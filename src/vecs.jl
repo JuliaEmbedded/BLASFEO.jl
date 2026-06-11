@@ -4,7 +4,7 @@
 #               may as well use `blasfeo_allocate_*` and `blasfeo_free_*`
 
 # bits clone of panel major `blasfeo_dvec`
-mutable struct BlasfeoDvec
+mutable struct BlasfeoDvec <: AbstractVector{Cdouble}
 	  mem::Ptr{Cdouble} # pointer to passed chunk of memory
 	  pa::Ptr{Cdouble} # pointer to a pm array of doubles, the first is aligned to cache line size
 	  m::Cint # size
@@ -22,12 +22,12 @@ mutable struct BlasfeoDvec
 
     function BlasfeoDvec(other::Vector{Cdouble})
         vec = new(C_NULL,C_NULL,0,0,0)
-        @ccall blasfeo.blasfeo_allocate_dvec(m::Cint, pointer_from_objref(vec)::Ptr{BlasfeoDvec})::Cvoid
+        @ccall blasfeo.blasfeo_allocate_dvec(length(other)::Cint, pointer_from_objref(vec)::Ptr{BlasfeoDvec})::Cvoid
         function destructor(this)
             @ccall blasfeo.blasfeo_free_dvec(pointer_from_objref(this)::Ptr{BlasfeoDvec})::Cvoid
         end
 
-        @ccall blasfeo.blasfeo_pack_dvec(m::Cint,
+        @ccall blasfeo.blasfeo_pack_dvec(vec.m::Cint,
                                          other::Ptr{Cdouble}, 1::Cint,
                                          pointer_from_objref(vec)::Ptr{BlasfeoDvec},
                                          0::Cint)::Cvoid
@@ -37,7 +37,7 @@ mutable struct BlasfeoDvec
 end
 
 # bits clone of panel major `blasfeo_svec`
-mutable struct BlasfeoSvec
+mutable struct BlasfeoSvec <: AbstractVector{Cfloat}
 	  mem::Ptr{Cfloat} # pointer to passed chunk of memory
 	  pa::Ptr{Cfloat} # pointer to a pm array of floats, the first is aligned to cache line size
 	  m::Cint # size
@@ -55,12 +55,12 @@ mutable struct BlasfeoSvec
 
     function BlasfeoSvec(other::Vector{Cfloat})
         vec = new(C_NULL,C_NULL,0,0,0)
-        @ccall blasfeo.blasfeo_allocate_svec(m::Cint, pointer_from_objref(vec)::Ptr{BlasfeoSvec})::Cvoid
+        @ccall blasfeo.blasfeo_allocate_svec(length(other)::Cint, pointer_from_objref(vec)::Ptr{BlasfeoSvec})::Cvoid
         function destructor(this)
             @ccall blasfeo.blasfeo_free_svec(pointer_from_objref(this)::Ptr{BlasfeoSvec})::Cvoid
         end
 
-        @ccall blasfeo.blasfeo_pack_svec(m::Cint,
+        @ccall blasfeo.blasfeo_pack_svec(vec.m::Cint,
                                          other::Ptr{Cfloat}, 1::Cint,
                                          pointer_from_objref(vec)::Ptr{BlasfeoSvec},
                                          0::Cint)::Cvoid

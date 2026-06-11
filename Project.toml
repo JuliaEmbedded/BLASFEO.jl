@@ -1,7 +1,10 @@
 name = "BLASFEO"
 uuid = "2d913c56-f67c-11e9-3afb-9119491b9f4c"
-authors = ["Ian McInerney", "Imperial College London"]
 version = "0.1.0"
+authors = ["Ian McInerney", "Imperial College London"]
+
+[deps]
+blasfeo_jll = "6b574d4a-bb57-5a4b-b7e6-1c794c903646"
 
 [compat]
 julia = "1"

@@ -1,5 +1,12 @@
 module BLASFEO
+using blasfeo_jll
+include("vecs.jl")
+include("mats.jl")
+include("show.jl")
 
-greet() = print("Hello World!")
+# Vectors
+export BlasfeoDvec, BlasfeoSvec
+# Matrices
+export BlasfeoDmat, BlasfeoSmat
 
 end # module

@@ -1,6 +1,5 @@
 using BLASFEO
 using Test
 
-@testset "BLASFEO.jl" begin
-    # Write your own tests here.
-end
+include("mat/basics.jl")
+include("vec/basics.jl")

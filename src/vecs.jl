@@ -11,7 +11,7 @@ mutable struct BlasfeoDvec <: AbstractVector{Cdouble}
 	  pm::Cint # packed size
 	  memsize::Cint # size of needed memory
 
-    function BlasfeoDvec(m::Int)
+    function BlasfeoDvec(m::T) where {T <: Integer}
         vec = new(C_NULL,C_NULL,0,0,0)
         @ccall blasfeo.blasfeo_allocate_dvec(m::Cint, pointer_from_objref(vec)::Ptr{BlasfeoDvec})::Cvoid
         function destructor(this)
@@ -44,7 +44,7 @@ mutable struct BlasfeoSvec <: AbstractVector{Cfloat}
 	  pm::Cint # packed size
 	  memsize::Cint # size of needed memory
 
-    function BlasfeoSvec(m::Int,n::Int)
+    function BlasfeoSvec(m::T) where {T <: Integer}
         vec = new(C_NULL,C_NULL,0,0,0)
         @ccall blasfeo.blasfeo_allocate_svec(m::Cint, pointer_from_objref(vec)::Ptr{BlasfeoSvec})::Cvoid
         function destructor(this)
@@ -66,5 +66,51 @@ mutable struct BlasfeoSvec <: AbstractVector{Cfloat}
                                          0::Cint)::Cvoid
 
         return finalizer(destructor, vec)
+    end
+end
+
+# basic vector operations
+for (type,flag) in [
+    (:BlasfeoDvec, :d),
+    (:BlasfeoSvec, :s),
+    ]
+    # size
+    @eval Base.size(A::$type) = (A.m,)
+
+    # getindex
+    blasfeo_vecex1 = Symbol(:blasfeo_, flag, :vecex1)
+    @eval Base.getindex(A::$type, I::Vararg{Int, 1}) = @ccall blasfeo.$blasfeo_vecex1(pointer_from_objref(A)::Ptr{$type}, (I[1]-1)::Cint)::eltype($type)
+
+    # setindex!
+    blasfeo_vecin1 = Symbol(:blasfeo_, flag, :vecin1)
+    @eval Base.setindex!(A::$type, v::T, I::Vararg{Int, 1}) where {T <: Real} = @ccall blasfeo.$blasfeo_vecin1(v::eltype($type),pointer_from_objref(A)::Ptr{$type}, (I[1]-1)::Cint)::eltype($type)
+
+    # similar
+    @eval Base.similar(A::$type) = $type(A.m)
+    @eval Base.similar(A::$type,dims::Dims{1}) = $type(dims...)
+
+    # copy
+    blasfeo_veccp = Symbol(:blasfeo_, flag, :veccp)
+    @eval function copy(A::$type)
+        B = similar(A)
+        A_ptr = pointer_from_objref(A)
+        B_ptr = pointer_from_objref(B)
+        @ccall blasfeo.blasfeo_veccp(
+            A.m::Cint,
+            A_ptr::Ptr{$type}, 0::Cint,
+            B_ptr::Ptr{$type}, 0::Cint,
+        )::Cvoid
+        return B
+    end
+
+    # fill
+    blasfeo_vecse = Symbol(:blasfeo_, flag, :vecse)
+    @eval function fill(A::$type, b::T) where {T <: Real}
+        A_ptr = pointer_from_objref(A)
+        @ccall blasfeo.blasfeo_vecse(
+            A.m::Cint,
+            b::eltype($type),
+            A_ptr::Ptr{$type}, 0::Cint,
+        )::Cvoid
     end
 end

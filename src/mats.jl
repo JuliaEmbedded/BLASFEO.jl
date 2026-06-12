@@ -78,15 +78,47 @@ mutable struct BlasfeoSmat <: AbstractMatrix{Cfloat}
 end
 
 # basic matrix operations
-# TODO(@anton) Do we _need_ such tight typing on setindex?
 for (type,flag) in [
     (:BlasfeoDmat, :d),
     (:BlasfeoSmat, :s),
     ]
+    # size
     @eval Base.size(A::$type) = (A.m, A.n)
+
+    # getindex
     blasfeo_geex1 = Symbol(:blasfeo_, flag, :geex1)
     @eval Base.getindex(A::$type, I::Vararg{Int, 2}) = @ccall blasfeo.$blasfeo_geex1(pointer_from_objref(A)::Ptr{$type}, (I[1]-1)::Cint, (I[2]-1)::Cint)::eltype($type)
+
+    # setindex!
+    blasfeo_gein1 = Symbol(:blasfeo_, flag, :gein1)
+    @eval Base.setindex!(A::$type, v::T, I::Vararg{Int, 2}) where {T <: Real} = @ccall blasfeo.$blasfeo_gein1(v::eltype($type),pointer_from_objref(A)::Ptr{$type}, (I[1]-1)::Cint, (I[2]-1)::Cint)::eltype($type)
+
+    # similar
     @eval Base.similar(A::$type) = $type(A.m, A.n)
     @eval Base.similar(A::$type,dims::Dims{2}) = $type(dims...)
 
+    # copy
+    blasfeo_gecp = Symbol(:blasfeo_, flag, :gecp)
+    @eval function copy(A::$type)
+        B = similar(A)
+        A_ptr = pointer_from_objref(A)
+        B_ptr = pointer_from_objref(B)
+        @ccall blasfeo.blasfeo_gecp(
+            A.m::Cint, A.n::Cint,
+            A_ptr::Ptr{$type}, 0::Cint, 0::Cint,
+            B_ptr::Ptr{$type}, 0::Cint, 0::Cint
+        )::Cvoid
+        return B
+    end
+
+    # fill
+    blasfeo_gese = Symbol(:blasfeo_, flag, :gese)
+    @eval function fill(A::$type, b::T) where {T <: Real}
+        A_ptr = pointer_from_objref(A)
+        @ccall blasfeo.blasfeo_gese(
+            A.m::Cint, A.n::Cint,
+            b::eltype($type),
+            A_ptr::Ptr{$type}, 0::Cint, 0::Cint,
+        )::Cvoid
+    end
 end

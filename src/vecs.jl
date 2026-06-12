@@ -91,11 +91,11 @@ for (type,flag) in [
 
     # copy
     blasfeo_veccp = Symbol(:blasfeo_, flag, :veccp)
-    @eval function copy(A::$type)
+    @eval function Base.copy(A::$type)
         B = similar(A)
         A_ptr = pointer_from_objref(A)
         B_ptr = pointer_from_objref(B)
-        @ccall blasfeo.blasfeo_veccp(
+        @ccall blasfeo.$blasfeo_veccp(
             A.m::Cint,
             A_ptr::Ptr{$type}, 0::Cint,
             B_ptr::Ptr{$type}, 0::Cint,
@@ -103,14 +103,15 @@ for (type,flag) in [
         return B
     end
 
-    # fill
+    # fill!
     blasfeo_vecse = Symbol(:blasfeo_, flag, :vecse)
-    @eval function fill(A::$type, b::T) where {T <: Real}
+    @eval function Base.fill!(A::$type, b::T) where {T <: Real}
         A_ptr = pointer_from_objref(A)
-        @ccall blasfeo.blasfeo_vecse(
+        @ccall blasfeo.$blasfeo_vecse(
             A.m::Cint,
             b::eltype($type),
             A_ptr::Ptr{$type}, 0::Cint,
         )::Cvoid
+        return A
     end
 end

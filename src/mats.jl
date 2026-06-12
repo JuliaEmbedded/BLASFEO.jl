@@ -99,11 +99,11 @@ for (type,flag) in [
 
     # copy
     blasfeo_gecp = Symbol(:blasfeo_, flag, :gecp)
-    @eval function copy(A::$type)
+    @eval function Base.copy(A::$type)
         B = similar(A)
         A_ptr = pointer_from_objref(A)
         B_ptr = pointer_from_objref(B)
-        @ccall blasfeo.blasfeo_gecp(
+        @ccall blasfeo.$blasfeo_gecp(
             A.m::Cint, A.n::Cint,
             A_ptr::Ptr{$type}, 0::Cint, 0::Cint,
             B_ptr::Ptr{$type}, 0::Cint, 0::Cint
@@ -111,14 +111,44 @@ for (type,flag) in [
         return B
     end
 
-    # fill
+    # fill!
     blasfeo_gese = Symbol(:blasfeo_, flag, :gese)
-    @eval function fill(A::$type, b::T) where {T <: Real}
+    @eval function Base.fill!(A::$type, b::T) where {T <: Real}
         A_ptr = pointer_from_objref(A)
-        @ccall blasfeo.blasfeo_gese(
+        @ccall blasfeo.$blasfeo_gese(
             A.m::Cint, A.n::Cint,
             b::eltype($type),
             A_ptr::Ptr{$type}, 0::Cint, 0::Cint,
         )::Cvoid
+        return A
+    end
+
+    # convert to Matrix and back
+    # TODO(@anton) maybe the performance overhead of this means maybe we want only explicit constructors?
+    blasfeo_unpack = Symbol(:blasfeo_unpack_, flag, :mat)
+    blasfeo_pack = Symbol(:blasfeo_pack_, flag, :mat)
+    @eval function Base.convert(::Type{Matrix{eltype($type)}}, A::$type)
+        A_ptr = pointer_from_objref(A)
+        B = Matrix{eltype($type)}(undef, size(A))
+        @ccall blasfeo.$blasfeo_unpack(
+            A.m::Cint, A.n::Cint,
+            A_ptr::Ptr{$type},
+            0::Cint, 0::Cint,
+            B::Ptr{eltype($type)},
+            A.m::Cint
+        )::Cvoid
+        return B
+    end
+    @eval function Base.convert(::Type{$type}, A::Matrix{eltype($type)})
+        B = $type(size(A)...)
+        B_ptr = pointer_from_objref(B)
+        m,n = size(A)
+        @ccall blasfeo.$blasfeo_pack(
+            m::Cint, n::Cint,
+            A::Ptr{eltype($type)}, m::Cint,
+            B_ptr::Ptr{$type},
+            0::Cint, 0::Cint
+        )::Cvoid
+        return B
     end
 end

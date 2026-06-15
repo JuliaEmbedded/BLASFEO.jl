@@ -111,7 +111,7 @@ for (type,flag) in [
         return B
     end
 
-    # unsafe_convert to Ptr{blasfeo_[ds]mat} so you can directly pass to the low level c_interface
+    # unsafe_convert to Ptr{blasfeo_[ds]vec} so you can directly pass to the low level c interface
     blasfeo_vec =  Symbol(:blasfeo_, flag, :vec)
     @eval Base.unsafe_convert(::Type{Ptr{$blasfeo_vec}}, A::$type) = Base.unsafe_convert(Ptr{$blasfeo_vec}, A.vec)
 end

@@ -6,7 +6,6 @@ using .LibBlasfeo
 
 include("vecs.jl")
 include("mats.jl")
-include("show.jl")
 include("level1.jl")
 
 # Vectors

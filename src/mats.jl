@@ -125,4 +125,8 @@ for (type,flag) in [
         )::Cvoid
         return B
     end
+
+    # unsafe_convert to Ptr{blasfeo_[ds]mat} so you can directly pass to the low level c_interface
+    blasfeo_mat =  Symbol(:blasfeo_, flag, :mat)
+    @eval Base.unsafe_convert(::Type{Ptr{$blasfeo_mat}}, A::$type) = Base.unsafe_convert(Ptr{$blasfeo_mat}, A.mat)
 end

@@ -15,8 +15,10 @@
         @test (α.*a .+ b) ≈ axpy!(α,a_blasfeo,b_blasfeo,c_blasfeo)
         @test ((α.*a) .+ (β.*b)) ≈ axpby!(α,a_blasfeo,β,b_blasfeo,c_blasfeo)
         @test (a .* b) ≈ vecmul!(a_blasfeo, b_blasfeo, c_blasfeo)
+        fill!(c_blasfeo, 1.0)
+        @test (1 .+ a .* b) ≈ vecmulacc!(a_blasfeo, b_blasfeo, c_blasfeo)
         fill!(c_blasfeo, 0.0)
-        @test sum(a .* b) ≈ vecmulacc!(a_blasfeo, b_blasfeo, c_blasfeo)
+        @test sum(a .* b) ≈ vecmuldot!(a_blasfeo, b_blasfeo, c_blasfeo)
         @test (a .* b) ≈ c_blasfeo
 
         # Test destructively

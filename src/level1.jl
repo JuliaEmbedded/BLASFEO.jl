@@ -19,7 +19,7 @@ for (type,flag) in [
     end
 
     # 3 arg axpy
-    @eval function axpy(α::T, x::$type, y::$type, z::$type) where {T <: Real}
+    @eval function LinearAlgebra.axpy!(α::T, x::$type, y::$type, z::$type) where {T <: Real}
         $blasfeo_axpy(
             length(x),
             α, x, 0,
@@ -43,7 +43,7 @@ for (type,flag) in [
 
     # 3 arg axpby
     blasfeo_axpby = Symbol(:blasfeo_, flag, :axpby)
-    @eval function axpby!(α::T1, x::$type, β::T2, y::$type, z::$type) where {T1 <: Real, T2 <: Real}
+    @eval function LinearAlgebra.axpby!(α::T1, x::$type, β::T2, y::$type, z::$type) where {T1 <: Real, T2 <: Real}
         $blasfeo_axpby(
             length(x),
             α, x, 0,
@@ -53,8 +53,8 @@ for (type,flag) in [
         return z
     end
 
-    # dvecmul
-    blasfeo_dvecmul = blasfeo_axpby = Symbol(:blasfeo_, flag, :vecmul)
+    # vecmul
+    blasfeo_vecmul = Symbol(:blasfeo_, flag, :vecmul)
     @eval function vecmul!(x::$type, y::$type, z::$type)
         $blasfeo_vecmul(
             length(x),
@@ -65,9 +65,21 @@ for (type,flag) in [
         return z
     end
 
-    # dvecmulacc
-    blasfeo_dvecmul = blasfeo_axpby = Symbol(:blasfeo_, flag, :vecmul)
-    @eval vecmulacc!(x::$type, y::$type, z::$type) = $blasfeo_vecmul(length(x), x, 0, y, 0, z, 0)
+    # vecmulacc
+    blasfeo_vecmulacc = Symbol(:blasfeo_, flag, :vecmulacc)
+    @eval function vecmulacc!(x::$type, y::$type, z::$type)
+        $blasfeo_vecmulacc(
+            length(x),
+            x, 0,
+            y, 0,
+            z, 0,
+        )
+        return z
+    end
+
+    # vecmuldot
+    blasfeo_vecmuldot = Symbol(:blasfeo_, flag, :vecmuldot)
+    @eval vecmuldot!(x::$type, y::$type, z::$type) = $blasfeo_vecmuldot(length(x), x, 0, y, 0, z, 0)
 
     # TODO(@apozharski) givens plane rotations
 end

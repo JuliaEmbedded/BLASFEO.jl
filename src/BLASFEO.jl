@@ -15,6 +15,6 @@ export BlasfeoDvec, BlasfeoSvec
 export BlasfeoDmat, BlasfeoSmat
 
 # Level 1
-export axpy, axpby
+export axpy!, axpby!, vecmul!, vecmulacc!, vecmuldot!
 
 end # module

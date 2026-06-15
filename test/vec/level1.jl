@@ -12,8 +12,12 @@
 
         # Test nondestructively
         @test dot(a,b) ≈ dot(a_blasfeo, b_blasfeo)
-        @test (α.*a .+ b) ≈ axpy(α,a_blasfeo,b_blasfeo,c_blasfeo)
-        @test ((α.*a) .+ (β.*b)) ≈ axpby(α,a_blasfeo,β,b_blasfeo,c_blasfeo)
+        @test (α.*a .+ b) ≈ axpy!(α,a_blasfeo,b_blasfeo,c_blasfeo)
+        @test ((α.*a) .+ (β.*b)) ≈ axpby!(α,a_blasfeo,β,b_blasfeo,c_blasfeo)
+        @test (a .* b) ≈ vecmul!(a_blasfeo, b_blasfeo, c_blasfeo)
+        fill!(c_blasfeo, 0.0)
+        @test sum(a .* b) ≈ vecmulacc!(a_blasfeo, b_blasfeo, c_blasfeo)
+        @test (a .* b) ≈ c_blasfeo
 
         # Test destructively
         axpy!(α,a,b);axpy!(α,a_blasfeo,b_blasfeo)

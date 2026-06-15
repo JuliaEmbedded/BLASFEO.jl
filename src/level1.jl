@@ -37,19 +37,37 @@ for (type,flag) in [
             α, x, 0,
             β, y, 0,
             y, 0,
-        )::Cvoid
+        )
         return y
     end
 
     # 3 arg axpby
     blasfeo_axpby = Symbol(:blasfeo_, flag, :axpby)
-    @eval function axpby(α::T1, x::$type, β::T2, y::$type, z::$type) where {T1 <: Real, T2 <: Real}
+    @eval function axpby!(α::T1, x::$type, β::T2, y::$type, z::$type) where {T1 <: Real, T2 <: Real}
         $blasfeo_axpby(
             length(x),
             α, x, 0,
             β, y, 0,
             z, 0,
-        )::Cvoid
+        )
         return z
     end
+
+    # dvecmul
+    blasfeo_dvecmul = blasfeo_axpby = Symbol(:blasfeo_, flag, :vecmul)
+    @eval function vecmul!(x::$type, y::$type, z::$type)
+        $blasfeo_vecmul(
+            length(x),
+            x, 0,
+            y, 0,
+            z, 0,
+        )
+        return z
+    end
+
+    # dvecmulacc
+    blasfeo_dvecmul = blasfeo_axpby = Symbol(:blasfeo_, flag, :vecmul)
+    @eval vecmulacc!(x::$type, y::$type, z::$type) = $blasfeo_vecmul(length(x), x, 0, y, 0, z, 0)
+
+    # TODO(@apozharski) givens plane rotations
 end

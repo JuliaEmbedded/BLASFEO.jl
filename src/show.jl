@@ -31,23 +31,23 @@ for (type,shortname) in [
     (:BlasfeoDvec, :dvec),
     (:BlasfeoSvec, :svec),
     ]
-    printer = Symbol(:blasfeo_print_,shortname)
+    blasfeo_print_vec = Symbol(:blasfeo_print_,shortname)
     @eval begin
         function Base.show(io::IO, ::MIME"text/plain", vec::$type)
-            println("$(vec.m)-element $($type):")
-            @ccall blasfeo.$printer(vec.m::Cint, pointer_from_objref(vec)::Ptr{$type}, 0::Cint)::Cvoid
+            println("$(length(vec))-element $($type):")
+            $blasfeo_print_vec(length(vec), vec, 0)
         end
 
         function Base.show(io::IO, vec::$type)
-            println("$(vec.m)-element $($type):")
-            @ccall blasfeo.$printer(vec.m::Cint, pointer_from_objref(vec)::Ptr{$type}, 0::Cint)::Cvoid
+            println("$(length(vec))-element $($type):")
+            $blasfeo_print_vec(length(vec), vec, 0)
         end
     end
 end
 
 for (type,shortname) in [
-    (:BlasfeoDmat, "dmat"),
-    (:BlasfeoSmat, "smat"),
+    (:BlasfeoDmat, :dmat),
+    (:BlasfeoSmat, :smat),
     ]
     blasfeo_print_mat = Symbol(:blasfeo_print_,shortname)
     @eval begin

@@ -1,6 +1,9 @@
 module BLASFEO
 using LinearAlgebra
-using blasfeo_jll
+
+include("lib/LibBlasfeo.jl")
+using .LibBlasfeo
+
 include("vecs.jl")
 include("mats.jl")
 include("show.jl")

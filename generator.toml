@@ -1,0 +1,11 @@
+[general]
+library_name = "blasfeo"
+output_file_path = "./src/lib/LibBlasfeo.jl"
+module_name = "LibBlasfeo"
+jll_pkg_name = "blasfeo_jll"
+export_symbol_prefixes = ["blasfeo_"]
+extract_c_comment_style = "raw"
+auto_mutability = true
+[codegen]
+is_function_strictly_typed = false
+use_ccall_macro = true

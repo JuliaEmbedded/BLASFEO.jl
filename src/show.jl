@@ -1,13 +1,19 @@
 # TODO(@anton) mxn or nxm
 
-function Base.show(io, mat::BlasfeoDmat)
-    println("$(mat.m)x$(mat.n) BlasfeoDmat:")
-    @ccall blasfeo.blasfeo_print_dmat(mat.m::Cint, mat.n::Cint, pointer_from_objref(mat)::Ptr{BlasfeoDmat}, 0::Cint, 0::Cint)::Cvoid
+function Base.show(io, A::BlasfeoDmat)
+    println("$(size(A,1))x$(size(A,2)) BlasfeoDmat:")
+    blasfeo_print_dmat(
+        size(A,1), size(A,2),
+        A.mat, 0, 0,
+    )
 end
 
-function Base.show(io, mat::BlasfeoSmat)
-    println("$(mat.m)x$(mat.n) BlasfeoSmat:")
-    @ccall blasfeo.blasfeo_print_smat(mat.m::Cint, mat.n::Cint, pointer_from_objref(mat)::Ptr{BlasfeoSmat}, 0::Cint, 0::Cint)::Cvoid
+function Base.show(io, A::BlasfeoSmat)
+    println("$(size(A,1))x$(size(A,2)) BlasfeoSmat:")
+    blasfeo_print_smat(
+        size(A,1), size(A,2),
+        A.mat, 0, 0,
+    )
 end
 
 function Base.show(io, vec::BlasfeoDvec)
@@ -43,16 +49,22 @@ for (type,shortname) in [
     (:BlasfeoDmat, "dmat"),
     (:BlasfeoSmat, "smat"),
     ]
-    printer = Symbol(:blasfeo_print_,shortname)
+    blasfeo_print_mat = Symbol(:blasfeo_print_,shortname)
     @eval begin
-        function Base.show(io::IO, ::MIME"text/plain", mat::$type)
-            println("$(mat.m)x$(mat.n) $($type):")
-            @ccall blasfeo.$printer(mat.m::Cint, mat.n::Cint, pointer_from_objref(mat)::Ptr{$type}, 0::Cint, 0::Cint)::Cvoid
+        function Base.show(io::IO, ::MIME"text/plain", A::$type)
+            println("$(size(A,1))x$(size(A,2)) $($type):")
+            $blasfeo_print_mat(
+                size(A,1), size(A,2),
+                A.mat, 0, 0,
+            )
         end
 
-        function Base.show(io::IO, mat::$type)
-            println("$(mat.m)x$(mat.n) $($type):")
-            @ccall blasfeo.$printer(mat.m::Cint, mat.n::Cint, pointer_from_objref(mat)::Ptr{$type}, 0::Cint, 0::Cint)::Cvoid
+        function Base.show(io::IO, A::$type)
+            println("$(size(A,1))x$(size(A,2)) $($type):")
+            $blasfeo_print_mat(
+                size(A,1), size(A,2),
+                A.mat, 0, 0,
+            )
         end
     end
 end

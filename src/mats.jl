@@ -6,36 +6,28 @@
 # bits clone of panel major `blasfeo_dmat`
 # blasfeo_jll compiles with PANELMAJ so we only need this one and not the column major version
 mutable struct BlasfeoDmat <: AbstractMatrix{Cdouble}
-    const mem::Ptr{Cdouble} # pointer to passed chunk of memory
-    const pA::Ptr{Cdouble} # pointer to a pm*pn array of doubles, the first is aligned to cache line size
-    const dA::Ptr{Cdouble} # pointer to a min(m,n) (or max???) array of doubles
-    const m::Cint # rows
-    const n::Cint # cols
-    const pm::Cint # packed number or rows
-    const cn::Cint # packed number or cols
-    const use_dA::Cint # flag to tell if dA can be used
-    const memsize::Cint # size of needed memory
+    mat::Base.RefValue{blasfeo_dmat}
 
     function BlasfeoDmat(m::Integer,n::Integer)
-        mat = new(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
-        @ccall blasfeo.blasfeo_allocate_dmat(m::Cint, n::Cint, pointer_from_objref(mat)::Ptr{BlasfeoDmat})::Cvoid
+        blasfeo_mat = blasfeo_dmat(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
+        ptr_blasfeo_mat = Ref(blasfeo_mat)
+        blasfeo_allocate_dmat(m, n, ptr_blasfeo_mat)
+        mat = new(ptr_blasfeo_mat)
         function destructor(this)
-            @ccall blasfeo.blasfeo_free_dmat(pointer_from_objref(this)::Ptr{BlasfeoDmat})::Cvoid
+            blasfeo_free_dmat(this.mat)
         end
         return finalizer(destructor, mat)
     end
 
     function BlasfeoDmat(other::Matrix{Cdouble})
-        mat = new(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
+        blasfeo_mat = blasfeo_dmat(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
         m,n = size(other)
-        @ccall blasfeo.blasfeo_allocate_dmat(m::Cint, n::Cint, pointer_from_objref(mat)::Ptr{BlasfeoDmat})::Cvoid
+        blasfeo_allocate_dmat(m, n, blasfeo_mat)
+        mat = new(blasfeo_mat)
         function destructor(this)
-            @ccall blasfeo.blasfeo_free_dmat(pointer_from_objref(this)::Ptr{BlasfeoDmat})::Cvoid
+            blasfeo_free_dmat(this.mat)
         end
-        @ccall blasfeo.blasfeo_pack_dmat(m::Cint, n::Cint,
-                                         other::Ptr{Cdouble}, m::Cint,
-                                         pointer_from_objref(mat)::Ptr{BlasfeoDmat},
-                                         0::Cint, 0::Cint)::Cvoid
+        blasfeo_pack_dmat(m, n, other, m, blasfeo_mat, 0, 0)::Cvoid
         return finalizer(destructor, mat)
     end
 end
@@ -43,36 +35,27 @@ end
 # bits clone of panel major `blasfeo_smat`
 # blasfeo_jll compiles with PANELMAJ so we only need this one and not the column major version
 mutable struct BlasfeoSmat <: AbstractMatrix{Cfloat}
-    const mem::Ptr{Cfloat} # pointer to passed chunk of memory
-    const pA::Ptr{Cfloat} # pointer to a pm*pn array of doubles, the first is aligned to cache line size
-    const dA::Ptr{Cfloat} # pointer to a min(m,n) (or max???) array of doubles
-    const m::Cint # rows
-    const n::Cint # cols
-    const pm::Cint # packed number or rows
-    const cn::Cint # packed number or cols
-    const use_dA::Cint # flag to tell if dA can be used
-    const memsize::Cint # size of needed memory
+    mat::blasfeo_dmat
 
     function BlasfeoSmat(m::Integer,n::Integer)
-        mat = new(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
-        @ccall blasfeo.blasfeo_allocate_smat(m::Cint, n::Cint, pointer_from_objref(mat)::Ptr{BlasfeoSmat})::Cvoid
+        blasfeo_mat = blasfeo_smat(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
+        blasfeo_allocate_smat(m, n, blasfeo_mat)
+        mat = new(blasfeo_mat)
         function destructor(this)
-            @ccall blasfeo.blasfeo_free_smat(pointer_from_objref(this)::Ptr{BlasfeoSmat})::Cvoid
+            blasfeo_free_smat(this.mat)
         end
         return finalizer(destructor, mat)
     end
 
     function BlasfeoSmat(other::Matrix{Cfloat})
-        mat = new(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
+        blasfeo_mat = blasfeo_smat(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
         m,n = size(other)
-        @ccall blasfeo.blasfeo_allocate_smat(m::Cint, n::Cint, pointer_from_objref(mat)::Ptr{BlasfeoSmat})::Cvoid
+        blasfeo_allocate_smat(m, n, blasfeo_mat)
+        mat = new(blasfeo_mat)
         function destructor(this)
-            @ccall blasfeo.blasfeo_free_smat(pointer_from_objref(this)::Ptr{BlasfeoSmat})::Cvoid
+            blasfeo_free_smat(this.mat)
         end
-        @ccall blasfeo.blasfeo_pack_smat(m::Cint, n::Cint,
-                                         other::Ptr{Cdouble}, m::Cint,
-                                         pointer_from_objref(mat)::Ptr{BlasfeoSmat},
-                                         0::Cint, 0::Cint)::Cvoid
+        blasfeo_pack_smat(m, n, other, m, blasfeo_mat, 0, 0)::Cvoid
         return finalizer(destructor, mat)
     end
 end
@@ -83,15 +66,15 @@ for (type,flag) in [
     (:BlasfeoSmat, :s),
     ]
     # size
-    @eval Base.size(A::$type) = (A.m, A.n)
+    @eval Base.size(A::$type) = (A.mat[].m, A.mat[].n)
 
     # getindex
     blasfeo_geex1 = Symbol(:blasfeo_, flag, :geex1)
-    @eval Base.getindex(A::$type, I::Vararg{Int, 2}) = @ccall blasfeo.$blasfeo_geex1(pointer_from_objref(A)::Ptr{$type}, (I[1]-1)::Cint, (I[2]-1)::Cint)::eltype($type)
+    @eval Base.getindex(A::$type, I::Vararg{Int, 2}) = $blasfeo_geex1(A.mat, I[1]-1, I[2]-1)
 
     # setindex!
     blasfeo_gein1 = Symbol(:blasfeo_, flag, :gein1)
-    @eval Base.setindex!(A::$type, v::T, I::Vararg{Int, 2}) where {T <: Real} = @ccall blasfeo.$blasfeo_gein1(v::eltype($type),pointer_from_objref(A)::Ptr{$type}, (I[1]-1)::Cint, (I[2]-1)::Cint)::eltype($type)
+    @eval Base.setindex!(A::$type, v::T, I::Vararg{Int, 2}) where {T <: Real} = $blasfeo_gein1(v, A.mat, I[1]-1, I[2]-1)
 
     # similar
     @eval Base.similar(A::$type) = $type(A.m, A.n)
@@ -101,25 +84,22 @@ for (type,flag) in [
     blasfeo_gecp = Symbol(:blasfeo_, flag, :gecp)
     @eval function Base.copy(A::$type)
         B = similar(A)
-        A_ptr = pointer_from_objref(A)
-        B_ptr = pointer_from_objref(B)
-        @ccall blasfeo.$blasfeo_gecp(
-            A.m::Cint, A.n::Cint,
-            A_ptr::Ptr{$type}, 0::Cint, 0::Cint,
-            B_ptr::Ptr{$type}, 0::Cint, 0::Cint
-        )::Cvoid
+        $blasfeo_gecp(
+            size(A,1), size(A,2),
+            A.mat, 0, 0,
+            B.mat, 0, 0,
+        )
         return B
     end
 
     # fill!
     blasfeo_gese = Symbol(:blasfeo_, flag, :gese)
     @eval function Base.fill!(A::$type, b::T) where {T <: Real}
-        A_ptr = pointer_from_objref(A)
-        @ccall blasfeo.$blasfeo_gese(
-            A.m::Cint, A.n::Cint,
-            b::eltype($type),
-            A_ptr::Ptr{$type}, 0::Cint, 0::Cint,
-        )::Cvoid
+        $blasfeo_gese(
+            size(A,1), size(A,2),
+            b,
+            A.mat, 0, 0,
+        )
         return A
     end
 
@@ -128,26 +108,20 @@ for (type,flag) in [
     blasfeo_unpack = Symbol(:blasfeo_unpack_, flag, :mat)
     blasfeo_pack = Symbol(:blasfeo_pack_, flag, :mat)
     @eval function Base.convert(::Type{Matrix{eltype($type)}}, A::$type)
-        A_ptr = pointer_from_objref(A)
         B = Matrix{eltype($type)}(undef, size(A))
-        @ccall blasfeo.$blasfeo_unpack(
-            A.m::Cint, A.n::Cint,
-            A_ptr::Ptr{$type},
-            0::Cint, 0::Cint,
-            B::Ptr{eltype($type)},
-            A.m::Cint
+        $blasfeo_unpack(
+            size(A,1), size(A,2),
+            A.mat, 0, 0,
+            B, stride(B),
         )::Cvoid
         return B
     end
     @eval function Base.convert(::Type{$type}, A::Matrix{eltype($type)})
         B = $type(size(A)...)
-        B_ptr = pointer_from_objref(B)
-        m,n = size(A)
-        @ccall blasfeo.$blasfeo_pack(
-            m::Cint, n::Cint,
-            A::Ptr{eltype($type)}, m::Cint,
-            B_ptr::Ptr{$type},
-            0::Cint, 0::Cint
+        $blasfeo_pack(
+            size(A,1), size(A,2),
+            A, stride(A),
+            B.mat, 0, 0,
         )::Cvoid
         return B
     end

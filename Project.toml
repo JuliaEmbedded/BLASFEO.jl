@@ -4,10 +4,12 @@ version = "0.1.0"
 authors = ["Ian McInerney", "Imperial College London"]
 
 [deps]
+CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 blasfeo_jll = "6b574d4a-bb57-5a4b-b7e6-1c794c903646"
 
 [compat]
+CEnum = "0.5.0"
 LinearAlgebra = "1.12.0"
 julia = "1"
 

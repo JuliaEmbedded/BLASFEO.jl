@@ -94,6 +94,8 @@ for (type,flag) in [
     end
 
     #### unary arithmetic:
+    # TODO(@apozharski) all of this is to avoid wierd promotion rules where
+    # *(Real, BlasfeoDvec) -> Vector{Float64} !?
 
     # unary plus
     @eval Base.:+(x::$type) = x
@@ -108,6 +110,10 @@ for (type,flag) in [
     @eval Base.:*(x::$type, y::$type) = vecmul!(x, y, similar(x))
     @eval Base.:*(x::$type, y::T) where {T<:Real} = veccpsc!(y, x, similar(x))
     @eval Base.:*(x::T, y::$type) where {T<:Real} = veccpsc!(x, y, similar(y))
+    @eval Base.:\(x::$type, y::T) where {T<:Real} = veccpsc!(inv(y), x, similar(x))
+    @eval Base.:\(x::T, y::$type) where {T<:Real} = veccpsc!(inv(x), y, similar(y))
+    @eval Base.:/(x::$type, y::T) where {T<:Real} = veccpsc!(inv(y), x, similar(x))
+    @eval Base.:/(x::T, y::$type) where {T<:Real} = veccpsc!(inv(x), y, similar(y))
 
     # TODO(@apozharski) givens plane rotations
 end

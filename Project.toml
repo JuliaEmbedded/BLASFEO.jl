@@ -1,7 +1,7 @@
 name = "BLASFEO"
 uuid = "2d913c56-f67c-11e9-3afb-9119491b9f4c"
 version = "0.1.0"
-authors = ["Ian McInerney", "Imperial College London"]
+authors = ["Anton Pozharskiy <apozharski@gmail.com>", "Ian McInerney <ian.s.mcinerney@ieee.org>"]
 
 [deps]
 CEnum = "fa961155-64e5-5f13-b03f-caf6b980ea82"

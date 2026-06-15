@@ -7,6 +7,7 @@ using .LibBlasfeo
 include("vecs.jl")
 include("mats.jl")
 include("level1.jl")
+include("level2.jl")
 
 # Vectors
 export BlasfeoDvec, BlasfeoSvec

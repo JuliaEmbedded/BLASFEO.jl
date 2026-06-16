@@ -96,6 +96,7 @@ for (type,flag) in [
     #### unary arithmetic:
     # TODO(@apozharski) all of this is to avoid wierd promotion rules where
     # *(Real, BlasfeoDvec) -> Vector{Float64} !?
+    # But is there a better way?
 
     # unary plus
     @eval Base.:+(x::$type) = x

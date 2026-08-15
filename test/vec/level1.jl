@@ -17,6 +17,25 @@
         @test_throws DimensionMismatch a_blasfeo-d_blasfeo
         @test_throws DimensionMismatch a_blasfeo*d_blasfeo
 
+        @test_throws DimensionMismatch vecmulacc!(a_blasfeo,b_blasfeo,d_blasfeo)
+        @test_throws DimensionMismatch vecmulacc!(a_blasfeo,d_blasfeo,c_blasfeo)
+        @test_throws DimensionMismatch vecmulacc!(d_blasfeo,b_blasfeo,c_blasfeo)
+        @test_throws DimensionMismatch vecmul!(a_blasfeo,b_blasfeo,d_blasfeo)
+        @test_throws DimensionMismatch vecmul!(a_blasfeo,d_blasfeo,c_blasfeo)
+        @test_throws DimensionMismatch vecmul!(d_blasfeo,b_blasfeo,c_blasfeo)
+        @test_throws DimensionMismatch vecmuldot!(a_blasfeo,b_blasfeo,d_blasfeo)
+        @test_throws DimensionMismatch vecmuldot!(a_blasfeo,d_blasfeo,c_blasfeo)
+        @test_throws DimensionMismatch vecmuldot!(d_blasfeo,b_blasfeo,c_blasfeo)
+        @test_throws DimensionMismatch axpy!(α,a_blasfeo,b_blasfeo,d_blasfeo)
+        @test_throws DimensionMismatch axpy!(α,a_blasfeo,d_blasfeo,c_blasfeo)
+        @test_throws DimensionMismatch axpy!(α,d_blasfeo,b_blasfeo,c_blasfeo)
+        @test_throws DimensionMismatch axpby!(α,a_blasfeo,β,b_blasfeo,d_blasfeo)
+        @test_throws DimensionMismatch axpby!(α,a_blasfeo,β,d_blasfeo,c_blasfeo)
+        @test_throws DimensionMismatch axpby!(α,d_blasfeo,β,b_blasfeo,c_blasfeo)
+        @test_throws DimensionMismatch dot(a_blasfeo, d_blasfeo)
+        @test_throws DimensionMismatch axpy!(α,d_blasfeo,b_blasfeo)
+        @test_throws DimensionMismatch axpy!(α,d_blasfeo,b_blasfeo)
+
         # Test basic operations
         @test +a ≈ +a_blasfeo
         @test isa(+a_blasfeo, VEC)

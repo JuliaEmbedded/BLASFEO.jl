@@ -10,7 +10,6 @@ options = load_options(joinpath(@__DIR__, "generator.toml"))
 
 # add compiler flags
 args = get_default_args()
-#push!(args, "-I$include_dir")
 push!(args, "-DMF_PANELMAJ")
 push!(args, "-DLA_HIGH_PERFORMANCE")
 push!(args, "-DEXT_DEP_MALLOC")

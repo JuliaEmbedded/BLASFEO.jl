@@ -102,13 +102,22 @@ for (type,flag) in [
     @eval Base.:+(x::$type) = x
 
     # unary minus
-    @eval Base.:-(x::$type) = veccpsc!(-1, x. similar(x))
+    @eval Base.:-(x::$type) = veccpsc!(-1, x, similar(x))
 
     #### binary arithmetic
     # binary plus
-    @eval Base.:+(x::$type, y::$type) = axpy!(1.0, x, y, similar(x))
-    @eval Base.:-(x::$type, y::$type) = axpy!(-1.0, y, x, similar(x))
-    @eval Base.:*(x::$type, y::$type) = vecmul!(x, y, similar(x))
+    @eval function Base.:+(x::$type, y::$type)
+        @checkvecdims x y
+        return axpy!(1.0, x, y, similar(x))
+    end
+    @eval function Base.:-(x::$type, y::$type)
+        @checkvecdims x y
+        return axpy!(-1.0, y, x, similar(x))
+    end
+    @eval function Base.:*(x::$type, y::$type)
+        @checkvecdims x y
+        return vecmul!(x, y, similar(x))
+    end
     @eval Base.:*(x::$type, y::T) where {T<:Real} = veccpsc!(y, x, similar(x))
     @eval Base.:*(x::T, y::$type) where {T<:Real} = veccpsc!(x, y, similar(y))
     @eval Base.:\(x::$type, y::T) where {T<:Real} = veccpsc!(inv(y), x, similar(x))

@@ -4,6 +4,7 @@ using LinearAlgebra
 include("lib/LibBlasfeo.jl")
 using .LibBlasfeo
 
+include("utils.jl")
 include("vecs.jl")
 include("mats.jl")
 include("level1.jl")

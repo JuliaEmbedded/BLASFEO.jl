@@ -3,12 +3,26 @@
         a = rand(eltype(VEC), 100)
         b = rand(eltype(VEC), 100)
         c = zeros(eltype(VEC), 100)
+        d = zeros(eltype(VEC), 99)
         a_blasfeo = VEC(a)
         b_blasfeo = VEC(b)
         c_blasfeo = VEC(c)
+        d_blasfeo = VEC(d)
 
-        α = rand()
-        β = rand()
+        α = rand(eltype(VEC))
+        β = rand(eltype(VEC))
+
+        # Test dimensions mismatch throws
+        @test_throws DimensionMismatch a_blasfeo+d_blasfeo
+        @test_throws DimensionMismatch a_blasfeo-d_blasfeo
+        @test_throws DimensionMismatch a_blasfeo*d_blasfeo
+
+        # Test basic operations
+        @test +a ≈ +a_blasfeo
+        @test isa(+a_blasfeo, VEC)
+        @test -a ≈ -a_blasfeo
+        @test isa(-a_blasfeo, VEC)
+        @test a+b ≈ a_blasfeo + b_blasfeo
 
         # Test nondestructively
         @test dot(a,b) ≈ dot(a_blasfeo, b_blasfeo)

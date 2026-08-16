@@ -21,6 +21,9 @@ makedocs(
     ),
 )
 
-deploydocs(;
+deploydocs(
+    ;
     repo="github.com/JuliaEmbedded/BLASFEO.jl",
+    push_preview = true,
+    devbranch = "master",
 )

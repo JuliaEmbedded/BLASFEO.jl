@@ -1,3 +1,60 @@
+@doc """
+    axpy!(α, x, y, z)
+
+Along with the standard 2 argument `axpy!(α, x, y)`, `BLASFEO.jl` uses the 3 argument style of the `BLASFEO` api.
+
+This allows a separate output vector `z` rather than overwriting `y`. This results in `z = α * x + y`.
+"""
+LinearAlgebra.axpy!
+
+@doc """
+    axpy!(α, x, β, y, z)
+
+Along with the standard 2 argument `axpby!(α, x, β, y)`, `BLASFEO.jl` uses the 3 argument style of the `BLASFEO` api.
+
+This allows a separate output vector `z` rather than overwriting `y`. This results in `z = α * x + β * y`.
+"""
+LinearAlgebra.axpby!
+
+@doc """
+    axpy!(α, x, y, z)
+
+Along with the standard 2 argument `axpy!(α, x, y)`, `BLASFEO.jl` uses the 3 argument style of the `BLASFEO` api.
+
+This allows a separate output vector `z` rather than overwriting `y`. This results in `z = α * x + y`.
+"""
+LinearAlgebra.axpy!
+
+@doc """
+    vecmul!(x, y, z)
+
+Performs indexwise multiplication of `x` and `y` and stores it in `z`. It produces equivalent results to `z .= x .* y`.
+"""
+vecmul!
+
+@doc """
+    vecmulacc!(x, y, z)
+
+Performs indexwise multiplication of `x` and `y` and adds it elementwise to `z`. It produces equivalent results to `z .+= x .* y`.
+"""
+vecmulacc!
+
+@doc """
+    vecmuldot!(x, y, z)
+
+Performs indexwise multiplication of `x` and `y` and stores it to `z`. It produces equivalent results to `z .+= x .* y`.
+Additionally this returns the dot product of `x` and `y`: `x^T * y`.
+"""
+vecmuldot!
+
+@doc """
+    veccpsc!(α, x, y)
+
+Preforms a copy and scale operation: `y .= α * x`.
+"""
+veccpsc!
+
+
 for (type,flag) in [
     (:BlasfeoDvec, :d),
     (:BlasfeoSvec, :s),

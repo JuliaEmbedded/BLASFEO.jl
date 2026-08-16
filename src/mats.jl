@@ -3,11 +3,17 @@
 #               we still need the bitstype struct and to manage that memory so I think
 #               may as well use `blasfeo_allocate_*` and `blasfeo_free_*`
 
-# bits clone of panel major `blasfeo_dmat`
-# blasfeo_jll compiles with PANELMAJ so we only need this one and not the column major version
+
+"""
+  Single precision panel major matrix which is a subtype of `AbstractMatrix{Cdouble}`.
+  The matrix uses the `BLASFEO` allocation utilities to allocate memory, and therefore uses a finalizer.
+"""
 mutable struct BlasfeoDmat <: AbstractMatrix{Cdouble}
     mat::Base.RefValue{blasfeo_dmat}
 
+    """
+      Constructs a new `BLASFEO` double precision matrix with dimensions mxn.
+    """
     function BlasfeoDmat(m::Integer,n::Integer)
         blasfeo_mat = blasfeo_dmat(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
         ref_blasfeo_mat = Ref(blasfeo_mat)
@@ -19,6 +25,9 @@ mutable struct BlasfeoDmat <: AbstractMatrix{Cdouble}
         return finalizer(destructor, mat)
     end
 
+    """
+      Constructs a new `BLASFEO` double precision matrix with dimensions and values from a dense julia matrix.
+    """
     function BlasfeoDmat(other::Matrix{Cdouble})
         blasfeo_mat = blasfeo_dmat(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
         ref_blasfeo_mat = Ref(blasfeo_mat)
@@ -31,13 +40,35 @@ mutable struct BlasfeoDmat <: AbstractMatrix{Cdouble}
         blasfeo_pack_dmat(m, n, other, m, mat, 0, 0)
         return finalizer(destructor, mat)
     end
+
+    """
+      Constructs a new `BLASFEO` double precision matrix with dimensions and values from a AbstractMatrix{Cdouble}.
+      This routine falls back to single index assignment as we cannot know the underlying memory representation.
+    """
+    function BlasfeoDmat(other::AbstractMatrix{Cdouble})
+        blasfeo_mat = blasfeo_dmat(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
+        ref_blasfeo_mat = Ref(blasfeo_mat)
+        m,n = size(other)
+        blasfeo_allocate_dmat(m, n, ref_blasfeo_mat)
+        mat = new(ref_blasfeo_mat)
+        function destructor(this)
+            blasfeo_free_dmat(this)
+        end
+        blasfeo_mat .= other
+        return finalizer(destructor, mat)
+    end
 end
 
-# bits clone of panel major `blasfeo_smat`
-# blasfeo_jll compiles with PANELMAJ so we only need this one and not the column major version
+"""
+  Single precision panel major matrix which is a subtype of `AbstractMatrix{Cfloat}`
+  The matrix uses the `BLASFEO` allocation utilities to allocate memory, and therefore uses a finalizer.
+"""
 mutable struct BlasfeoSmat <: AbstractMatrix{Cfloat}
     mat::Base.RefValue{blasfeo_smat}
 
+    """
+      Constructs a new `BLASFEO` single precision matrix with dimensions mxn.
+    """
     function BlasfeoSmat(m::Integer,n::Integer)
         blasfeo_mat = blasfeo_smat(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
         ref_blasfeo_mat = Ref(blasfeo_mat)
@@ -49,6 +80,9 @@ mutable struct BlasfeoSmat <: AbstractMatrix{Cfloat}
         return finalizer(destructor, mat)
     end
 
+    """
+      Constructs a new `BLASFEO` single precision matrix with dimensions and values from a dense julia matrix.
+    """
     function BlasfeoSmat(other::Matrix{Cfloat})
         blasfeo_mat = blasfeo_smat(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
         ref_blasfeo_mat = Ref(blasfeo_mat)
@@ -59,6 +93,23 @@ mutable struct BlasfeoSmat <: AbstractMatrix{Cfloat}
             blasfeo_free_smat(this)
         end
         blasfeo_pack_smat(m, n, other, m, mat, 0, 0)
+        return finalizer(destructor, mat)
+    end
+
+    """
+      Constructs a new `BLASFEO` single precision matrix with dimensions and values from a AbstractMatrix{Cdouble}.
+      This routine falls back to single index assignment as we cannot know the underlying memory representation.
+    """
+    function BlasfeoDmat(other::AbstractMatrix{Cfloat})
+        blasfeo_mat = blasfeo_dmat(C_NULL,C_NULL,C_NULL,0,0,0,0,0,0)
+        ref_blasfeo_mat = Ref(blasfeo_mat)
+        m,n = size(other)
+        blasfeo_allocate_dmat(m, n, ref_blasfeo_mat)
+        mat = new(ref_blasfeo_mat)
+        function destructor(this)
+            blasfeo_free_dmat(this)
+        end
+        blasfeo_mat .= other
         return finalizer(destructor, mat)
     end
 end

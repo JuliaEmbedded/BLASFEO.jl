@@ -2,7 +2,7 @@
 
 |                 **License**                 |             **Build Status**              |                                     **Documentation**                                      |
 |:-------------------------------------------:|:-----------------------------------------:|:------------------------------------------------------------------------------------------:|
-| [![License: MIT][license-img]][license-url] | [![build-gh][build-gh-img]][build-gh-url] | ![docs-stable][docs-stable-img]][docs-stable-url] ![docs-dev][docs-dev-img]][docs-dev-url] |
+| [![License: MIT][license-img]][license-url] | [![build-gh][build-gh-img]][build-gh-url] | [![docs-stable][docs-stable-img]][docs-stable-url] [![docs-dev][docs-dev-img]][docs-dev-url] |
 
 [license-img]: https://img.shields.io/badge/License-MIT-yellow.svg
 [license-url]: https://github.com/JuliaEmbedded/BLASFEO.jl/blob/master/LICENSE

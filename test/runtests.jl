@@ -1,6 +1,8 @@
 using BLASFEO
+using LinearAlgebra
 using Test
 
-@testset "BLASFEO.jl" begin
-    # Write your own tests here.
-end
+include("mat/basics.jl")
+include("mat/level2.jl")
+include("vec/basics.jl")
+include("vec/level1.jl")

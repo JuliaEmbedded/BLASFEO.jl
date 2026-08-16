@@ -1,15 +1,13 @@
 # BLASFEO
 
-|                 **License**                 |             **Build Status**              |              **Coverage**              | **Documentation**                                                                           |
-|:-------------------------------------------:|:-----------------------------------------:|:--------------------------------------:|---------------------------------------------------------------------------------------------|
-| [![License: MIT][license-img]][license-url] | [![build-gh][build-gh-img]][build-gh-url] | [![codecov][codecov-img]][codecov-url] | ![docs-stable][docs-stable-img]][docs-stable-url] [![docs-dev][docs-dev-img]][docs-dev-url] |
+|                 **License**                 |             **Build Status**              |                                     **Documentation**                                      |
+|:-------------------------------------------:|:-----------------------------------------:|:------------------------------------------------------------------------------------------:|
+| [![License: MIT][license-img]][license-url] | [![build-gh][build-gh-img]][build-gh-url] | ![docs-stable][docs-stable-img]][docs-stable-url] ![docs-dev][docs-dev-img]][docs-dev-url] |
 
 [license-img]: https://img.shields.io/badge/License-MIT-yellow.svg
 [license-url]: https://github.com/JuliaEmbedded/BLASFEO.jl/blob/master/LICENSE
 [build-gh-img]: https://github.com/JuliaEmbedded/BLASFEO.jl/actions/workflows/CI.yml/badge.svg
 [build-gh-url]: https://github.com/JuliaEmbedded/BLASFEO.jl/actions/workflows/CI.yml
-[codecov-img]: https://codecov.io/gh/JuliaEmbedded/BLASFEO.jl/branch/master/graph/badge.svg?token=MBxH2AAu8Z
-[codecov-url]: https://codecov.io/gh/JuliaEmbedded/BLASFEO.jl
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-stable-url]: https://juliaembedded.github.io/BLASFEO.jl/stable
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-purple.svg

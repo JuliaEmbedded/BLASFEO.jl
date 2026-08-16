@@ -1,9 +1,7 @@
-# NOTE(@anton): Both of these structs are treated as mutable and Julia manages their
-#               lifetimes itself. Blasfeo also offers a way to preallocate memory but
-#               we still need the bitstype struct and to manage that memory so I think
-#               may as well use `blasfeo_allocate_*` and `blasfeo_free_*`
-
-# bits clone of panel major `blasfeo_dvec`
+"""
+  Double precision vector which is a subtype of `AbstractVector{Cdouble}`.
+  The matrix uses the `BLASFEO` allocation utilities to allocate memory, and therefore uses a finalizer.
+"""
 mutable struct BlasfeoDvec <: AbstractVector{Cdouble}
     vec::Base.RefValue{blasfeo_dvec}
 
@@ -32,7 +30,10 @@ mutable struct BlasfeoDvec <: AbstractVector{Cdouble}
     end
 end
 
-# bits clone of panel major `blasfeo_svec`
+"""
+  Single precision vector which is a subtype of `AbstractVector{Cfloat}`.
+  The matrix uses the `BLASFEO` allocation utilities to allocate memory, and therefore uses a finalizer.
+"""
 mutable struct BlasfeoSvec <: AbstractVector{Cfloat}
     vec::Base.RefValue{blasfeo_svec}
 

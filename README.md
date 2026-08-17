@@ -43,3 +43,5 @@ d = BlasfeoDvec(100)
 blasfeo_dgemv_n(100, 100, 2.0, A, 0, 0, b, 0, 0.0, d, 0, d, 0)
 
 ```
+Currently only a small subset of the `LinearAlgebra` functionality is set up to correctly dispatch to `BLASFEO` calls.
+Therefore, for full use please use the thin wrapper around the C API provided in `BLASFEO.LibBlasfeo`.

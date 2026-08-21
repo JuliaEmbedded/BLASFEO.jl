@@ -26,5 +26,35 @@
         # test mul!
         @test A*a ≈ mul!(y_blasfeo, A_blasfeo, a_blasfeo)
         @test transpose(A)*a ≈ mul!(y_blasfeo, transpose(A_blasfeo), a_blasfeo)
+
+        # test asymmetric
+        A = rand(eltype(VEC), 100, 50)
+        a = rand(eltype(VEC), 50)
+        y = rand(eltype(VEC), 100)
+        A_blasfeo = MAT(A)
+        a_blasfeo = VEC(a)
+        y_blasfeo = VEC(y)
+
+        @test A*a ≈ A_blasfeo*a_blasfeo
+        @test isa(A_blasfeo*a_blasfeo, VEC)
+        @test transpose(A)*y ≈ transpose(A_blasfeo)*y_blasfeo
+        @test isa(transpose(A_blasfeo)*y_blasfeo, VEC)
+
+        # test symmetric
+        A = rand(eltype(VEC), 100, 100)
+        a = rand(eltype(VEC), 100)
+        y = rand(eltype(VEC), 100)
+        A_blasfeo = MAT(A)
+        a_blasfeo = VEC(a)
+        y_blasfeo = VEC(y)
+        A_L = Symmetric(A,:L)
+        A_L_blasfeo = Symmetric(A_blasfeo,:L)
+        A_U = Symmetric(A,:U)
+        A_U_blasfeo = Symmetric(A_blasfeo,:U)
+
+        @test A_L*a ≈ A_L_blasfeo*a_blasfeo
+        @test isa(A_L_blasfeo*a_blasfeo, VEC)
+        @test A_U*a ≈ A_U_blasfeo*a_blasfeo
+        @test isa(A_U_blasfeo*a_blasfeo, VEC)
     end
 end

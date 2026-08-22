@@ -1,7 +1,7 @@
 
-for (Mat, Vec, flag) in [
-    (:BlasfeoDmat, :BlasfeoDvec, :d),
-    (:BlasfeoSmat, :BlasfeoSvec, :s),
+for (El, Mat, Vec, flag) in [
+    (:Cdouble, :BlasfeoDmat, :BlasfeoDvec, :d),
+    (:Cfloat, :BlasfeoSmat, :BlasfeoSvec, :s),
     ]
     # Overload matrix-vector multiplication
 
@@ -19,34 +19,13 @@ for (Mat, Vec, flag) in [
     blasfeo_trmv_unu = Symbol(:blasfeo_, flag, :trmv_unu)
 
     @eval function Base.:*(A::$Mat, x::$Vec)
-        @boundscheck begin
-            size(A)[2] == length(x) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
-        end
         z = similar(x, size(A,1))
-        $blasfeo_gemv_n(
-            size(A,1), size(A,2),
-            1.0, A, 0, 0,
-            x, 0,
-            0.0, x, 0,
-            z, 0,
-        )
-        return z # A*x
+        return mul!(z,A,x)
     end
 
-    @eval function Base.:*(A::Transpose{eltype($Mat), $Mat}, x::$Vec)
-        @boundscheck begin
-            size(A,2) == length(x) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
-        end
-
-        z = similar(x,size(A,1))
-        $blasfeo_gemv_t(
-            size(A,2), size(A,1),
-            1.0, A, 0, 0,
-            x, 0,
-            0.0, x, 0,
-            z, 0,
-        )
-        return z # A^T*x
+    @eval function Base.:*(A::Transpose{$El, $Mat}, x::$Vec)
+        z = similar(x, size(A,1))
+        return mul!(z,A,x) # A^T*x
     end
 
     @eval function LinearAlgebra.mul!(Y::$Vec, A::$Mat, B::$Vec)
@@ -64,14 +43,14 @@ for (Mat, Vec, flag) in [
         return Y
     end
 
-    @eval function LinearAlgebra.mul!(Y::$Vec, A::Transpose{eltype($Mat), $Mat}, B::$Vec)
+    @eval function LinearAlgebra.mul!(Y::$Vec, A::Transpose{$El, $Mat}, B::$Vec)
         @boundscheck begin
             size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
             size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
         end
 
         $blasfeo_gemv_t(
-            size(A,1), size(A,2),
+            size(A,2), size(A,1),
             1.0, A, 0, 0,
             B, 0,
             0.0, B, 0,
@@ -80,34 +59,12 @@ for (Mat, Vec, flag) in [
         return Y
     end
 
-
-    @eval function Base.:*(A::Symmetric{eltype($Mat), $Mat}, x::$Vec)
-        @boundscheck begin
-            size(A,1) == length(x) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
-        end
-
+    @eval function Base.:*(A::Symmetric{$El, $Mat}, x::$Vec)
         z = similar(x)
-        if A.uplo == 'L'
-            $blasfeo_symv_l(
-                size(A,1),
-                1.0, A.data, 0, 0,
-                x, 0,
-                0.0, x, 0,
-                z, 0,
-            )
-        else
-            $blasfeo_symv_u(
-                size(A,1),
-                1.0, A.data, 0, 0,
-                x, 0,
-                0.0, x, 0,
-                z, 0,
-            )
-        end
-        return z
+        return mul!(z,A,x)
     end
 
-    @eval function LinearAlgebra.mul!(Y::$Vec, A::Symmetric{eltype($Mat), $Mat}, B::$Vec)
+    @eval function LinearAlgebra.mul!(Y::$Vec, A::Symmetric{$El, $Mat}, B::$Vec)
         @boundscheck begin
             size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
             size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
@@ -134,23 +91,12 @@ for (Mat, Vec, flag) in [
     end
 
 
-    @eval function Base.:*(A::LowerTriangular{eltype($Mat), $Mat}, x::$Vec)
-        @boundscheck begin
-            size(A,1) == length(x) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
-        end
-
+    @eval function Base.:*(A::LowerTriangular{$El, $Mat}, x::$Vec)
         z = similar(x)
-        $blasfeo_trmv_lnn(
-            size(A,1),
-            1.0, A.data, 0, 0,
-            x, 0,
-            0.0, x, 0,
-            z, 0,
-        )
-        return z # A^T*x
+        return mul!(z,A,x)
     end
 
-    @eval function LinearAlgebra.mul!(Y::$Vec, A::LowerTriangular{eltype($Mat), $Mat}, B::$Vec)
+    @eval function LinearAlgebra.mul!(Y::$Vec, A::LowerTriangular{$El, $Mat}, B::$Vec)
         @boundscheck begin
             size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
             size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
@@ -158,107 +104,73 @@ for (Mat, Vec, flag) in [
 
         $blasfeo_trmv_lnn(
             size(A,1),
-            1.0, A.data, 0, 0,
+            A.data, 0, 0,
             B, 0,
-            0.0, B, 0,
             Y, 0,
         )
         return Y
     end
 
-    @eval function Base.:*(A::UpperTriangular{eltype($Mat), $Mat}, x::$Vec)
-        @boundscheck begin
-            size(A,1) == length(x) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
+    if El == :Cdouble # TODO(@anton) blasfeo_strmv_unn and blasfeo_strmv_lnu are unimplemented :(
+        @eval function Base.:*(A::UpperTriangular{$El, $Mat}, x::$Vec)
+            z = similar(x)
+            return mul!(z,A,x)
         end
 
-        z = similar(x)
-        $blasfeo_trmv_unn(
-            size(A,1),
-            1.0, A.data, 0, 0,
-            x, 0,
-            0.0, x, 0,
-            z, 0,
-        )
-        return z # A^T*x
-    end
+        @eval function LinearAlgebra.mul!(Y::$Vec, A::UpperTriangular{$El, $Mat}, B::$Vec)
+            @boundscheck begin
+                size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
+                size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
+            end
 
-    @eval function LinearAlgebra.mul!(Y::$Vec, A::UpperTriangular{eltype($Mat), $Mat}, B::$Vec)
-        @boundscheck begin
-            size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
-            size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
+            $blasfeo_trmv_unn(
+                size(A,1),
+                A.data, 0, 0,
+                B, 0,
+                Y, 0,
+            )
+            return Y
         end
 
-        $blasfeo_trmv_unn(
-            size(A,1),
-            1.0, A.data, 0, 0,
-            B, 0,
-            0.0, B, 0,
-            Y, 0,
-        )
-        return Y
-    end
-
-    @eval function Base.:*(A::UnitLowerTriangular{eltype($Mat), $Mat}, x::$Vec)
-        @boundscheck begin
-            size(A,1) == length(x) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
+        @eval function Base.:*(A::UnitLowerTriangular{$El, $Mat}, x::$Vec)
+            z = similar(x)
+            return mul!(z,A,x)
         end
 
-        z = similar(x)
-        $blasfeo_trmv_lnu(
-            size(A,1),
-            1.0, A.data, 0, 0,
-            x, 0,
-            0.0, x, 0,
-            z, 0,
-        )
-        return z # A^T*x
-    end
+        @eval function LinearAlgebra.mul!(Y::$Vec, A::UnitLowerTriangular{$El, $Mat}, B::$Vec)
+            @boundscheck begin
+                size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
+                size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
+            end
 
-    @eval function LinearAlgebra.mul!(Y::$Vec, A::UnitLowerTriangular{eltype($Mat), $Mat}, B::$Vec)
-        @boundscheck begin
-            size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
-            size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
+            $blasfeo_trmv_lnu(
+                size(A,1),A.data, 0, 0,
+                B, 0,
+                Y, 0,
+            )
+            return Y
         end
-
-        $blasfeo_trmv_lnu(
-            size(A,1),
-            1.0, A.data, 0, 0,
-            B, 0,
-            0.0, B, 0,
-            Y, 0,
-        )
-        return Y
     end
 
-    @eval function Base.:*(A::UnitUpperTriangular{eltype($Mat), $Mat}, x::$Vec)
-        @boundscheck begin
-            size(A,1) == length(x) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
-        end
+    # need to implement trmv_unu
+    # @eval function Base.:*(A::UnitUpperTriangular{$El, $Mat}, x::$Vec)
+    #     z = similar(x)
+    #     return mul!(z,A,x)
+    # end
 
-        z = similar(x)
-        $blasfeo_trmv_unu(
-            size(A,1),
-            1.0, A.data, 0, 0,
-            x, 0,
-            0.0, x, 0,
-            z, 0,
-        )
-        return z # A^T*x
-    end
+    # @eval function LinearAlgebra.mul!(Y::$Vec, A::UnitUpperTriangular{$El, $Mat}, B::$Vec)
+    #     @boundscheck begin
+    #         size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
+    #         size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
+    #     end
 
-    @eval function LinearAlgebra.mul!(Y::$Vec, A::UnitUpperTriangular{eltype($Mat), $Mat}, B::$Vec)
-        @boundscheck begin
-            size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
-            size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
-        end
-
-        $blasfeo_trmv_unu(
-            size(A,1),
-            1.0, A.data, 0, 0,
-            B, 0,
-            0.0, B, 0,
-            Y, 0,
-        )
-        return Y
-    end
+    #     $blasfeo_trmv_unu(
+    #         size(A,1),
+    #         1.0, A.data, 0, 0,
+    #         B, 0,
+    #         0.0, B, 0,
+    #         Y, 0,
+    #     )
+    #     return Y
+    # end
 end

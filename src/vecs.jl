@@ -81,6 +81,7 @@ for (type,flag) in [
     # similar
     @eval Base.similar(A::$type) = $type(length(A))
     @eval Base.similar(A::$type, dims::Dims{1}) = $type(dims...)
+    @eval Base.similar(A::$type, dims::Integer) = $type(dims)
     @eval Base.similar(A::$type, ::eltype($type)) = $type(length(A))
     @eval Base.similar(A::$type, ::eltype($type), dims::Dims{1}) = $type(dims...)
 

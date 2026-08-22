@@ -68,17 +68,15 @@
         # test lnn
         @test A_lnn*a ≈ A_lnn_blasfeo*a_blasfeo
         @test isa(A_lnn_blasfeo*a_blasfeo, VEC)
-        if MAT == BlasfeoDmat # TODO(@anton) not implemented upstream
-            # test unn
-            @test A_unn*a ≈ A_unn_blasfeo*a_blasfeo
-            @test isa(A_unn_blasfeo*a_blasfeo, VEC)
-            # test lnu
-            @test A_lnu*a ≈ A_lnu_blasfeo*a_blasfeo
-            @test isa(A_lnu_blasfeo*a_blasfeo, VEC)
-            # test unu
-            # TODO(@anton) not implemented upstream
-            #@test A_unu*a ≈ A_unu_blasfeo*a_blasfeo
-            #@test isa(A_unu_blasfeo*a_blasfeo, VEC)
-        end
+        # test unn
+        @test A_unn*a ≈ A_unn_blasfeo*a_blasfeo
+        @test isa(A_unn_blasfeo*a_blasfeo, VEC)
+        # test lnu
+        @test A_lnu*a ≈ A_lnu_blasfeo*a_blasfeo
+        @test isa(A_lnu_blasfeo*a_blasfeo, VEC)
+        # test unu
+        # TODO(@anton) not implemented upstream
+        @test A_unu*a ≈ A_unu_blasfeo*a_blasfeo
+        @test isa(A_unu_blasfeo*a_blasfeo, VEC)
     end
 end

@@ -109,7 +109,7 @@ end
 
 Explicitly column-major matrix structure
 """
-mutable struct blasfeo_cm_dmat
+struct blasfeo_cm_dmat
     mem::Ptr{Cdouble}
     pA::Ptr{Cdouble}
     dA::Ptr{Cdouble}
@@ -117,10 +117,9 @@ mutable struct blasfeo_cm_dmat
     n::Cint
     use_dA::Cint
     memsize::Cint
-    blasfeo_cm_dmat() = new()
 end
 
-mutable struct blasfeo_cm_smat
+struct blasfeo_cm_smat
     mem::Ptr{Cfloat}
     pA::Ptr{Cfloat}
     dA::Ptr{Cfloat}
@@ -128,23 +127,20 @@ mutable struct blasfeo_cm_smat
     n::Cint
     use_dA::Cint
     memsize::Cint
-    blasfeo_cm_smat() = new()
 end
 
-mutable struct blasfeo_cm_dvec
+struct blasfeo_cm_dvec
     mem::Ptr{Cdouble}
     pa::Ptr{Cdouble}
     m::Cint
     memsize::Cint
-    blasfeo_cm_dvec() = new()
 end
 
-mutable struct blasfeo_cm_svec
+struct blasfeo_cm_svec
     mem::Ptr{Cfloat}
     pa::Ptr{Cfloat}
     m::Cint
     memsize::Cint
-    blasfeo_cm_svec() = new()
 end
 
 """
@@ -359,10 +355,19 @@ end
 """
     blasfeo_dtrmv_unn(m, sA, ai, aj, sx, xi, sz, zi)
 
-z <= beta * y + alpha * A * x ; A upper triangular
+z <= A * x ; A upper triangular
 """
 function blasfeo_dtrmv_unn(m, sA, ai, aj, sx, xi, sz, zi)
     @ccall blasfeo.blasfeo_dtrmv_unn(m::Cint, sA::Ptr{blasfeo_dmat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_dvec}, xi::Cint, sz::Ptr{blasfeo_dvec}, zi::Cint)::Cvoid
+end
+
+"""
+    blasfeo_dtrmv_unu(m, sA, ai, aj, sx, xi, sz, zi)
+
+z <= A * x ; A upper triangular, assuming unit diagonal
+"""
+function blasfeo_dtrmv_unu(m, sA, ai, aj, sx, xi, sz, zi)
+    @ccall blasfeo.blasfeo_dtrmv_unu(m::Cint, sA::Ptr{blasfeo_dmat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_dvec}, xi::Cint, sz::Ptr{blasfeo_dvec}, zi::Cint)::Cvoid
 end
 
 """
@@ -372,6 +377,15 @@ z <= A^T * x ; A upper triangular
 """
 function blasfeo_dtrmv_utn(m, sA, ai, aj, sx, xi, sz, zi)
     @ccall blasfeo.blasfeo_dtrmv_utn(m::Cint, sA::Ptr{blasfeo_dmat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_dvec}, xi::Cint, sz::Ptr{blasfeo_dvec}, zi::Cint)::Cvoid
+end
+
+"""
+    blasfeo_dtrmv_utu(m, sA, ai, aj, sx, xi, sz, zi)
+
+z <= A^T * x ; A upper triangular, assuming unit diagonal
+"""
+function blasfeo_dtrmv_utu(m, sA, ai, aj, sx, xi, sz, zi)
+    @ccall blasfeo.blasfeo_dtrmv_utu(m::Cint, sA::Ptr{blasfeo_dmat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_dvec}, xi::Cint, sz::Ptr{blasfeo_dvec}, zi::Cint)::Cvoid
 end
 
 """
@@ -971,6 +985,245 @@ function blasfeo_dgelqf_pd_lla(m, n1, sL0, l0i, l0j, sL1, l1i, l1j, sA, ai, aj, 
 end
 
 """
+    blasfeo_cm_dgemm_nn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+
+BLAS 3
+"""
+function blasfeo_cm_dgemm_nn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dgemm_nn(m::Cint, n::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dgemm_nt(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dgemm_nt(m::Cint, n::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dgemm_tn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dgemm_tn(m::Cint, n::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dgemm_tt(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dgemm_tt(m::Cint, n::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyrk_ln(m, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyrk_ln(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyrk_lt(m, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyrk_lt(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyrk_un(m, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyrk_un(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyrk_ut(m, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyrk_ut(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyrk3_ln(m, k, alpha, sA, ai, aj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyrk3_ln(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyrk3_lt(m, k, alpha, sA, ai, aj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyrk3_lt(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyrk3_un(m, k, alpha, sA, ai, aj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyrk3_un(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyrk3_ut(m, k, alpha, sA, ai, aj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyrk3_ut(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_llnn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_llnn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_llnu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_llnu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_lltn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_lltn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_lltu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_lltu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_lunn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_lunn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_lunu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_lunu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_lutn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_lutn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_lutu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_lutu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_rlnn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_rlnn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_rlnu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_rlnu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_rltn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_rltn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_rltu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_rltu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_runn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_runn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_runu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_runu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_rutn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_rutn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrsm_rutu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrsm_rutu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_llnn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_llnn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_llnu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_llnu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_lltn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_lltn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_lltu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_lltu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_lunn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_lunn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_lunu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_lunu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_lutn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_lutn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_lutu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_lutu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_rlnn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_rlnn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_rlnu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_rlnu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_rltn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_rltn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_rltu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_rltu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_runn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_runn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_runu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_runu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_rutn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_rutn(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dtrmm_rutu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dtrmm_rutu(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyr2k_ln(m, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyr2k_ln(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyr2k_lt(m, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyr2k_lt(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyr2k_un(m, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyr2k_un(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsyr2k_ut(m, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dsyr2k_ut(m::Cint, k::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint, beta::Cdouble, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+"""
+    blasfeo_cm_dgemv_n(m, n, alpha, sA, ai, aj, sx, xi, beta, sy, yi, sz, zi)
+
+BLAS 2
+"""
+function blasfeo_cm_dgemv_n(m, n, alpha, sA, ai, aj, sx, xi, beta, sy, yi, sz, zi)
+    @ccall blasfeo.blasfeo_cm_dgemv_n(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_cm_dvec}, xi::Cint, beta::Cdouble, sy::Ptr{blasfeo_cm_dvec}, yi::Cint, sz::Ptr{blasfeo_cm_dvec}, zi::Cint)::Cvoid
+end
+
+function blasfeo_cm_dgemv_t(m, n, alpha, sA, ai, aj, sx, xi, beta, sy, yi, sz, zi)
+    @ccall blasfeo.blasfeo_cm_dgemv_t(m::Cint, n::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_cm_dvec}, xi::Cint, beta::Cdouble, sy::Ptr{blasfeo_cm_dvec}, yi::Cint, sz::Ptr{blasfeo_cm_dvec}, zi::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsymv_l(m, alpha, sA, ai, aj, sx, xi, beta, sy, yi, sz, zi)
+    @ccall blasfeo.blasfeo_cm_dsymv_l(m::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_cm_dvec}, xi::Cint, beta::Cdouble, sy::Ptr{blasfeo_cm_dvec}, yi::Cint, sz::Ptr{blasfeo_cm_dvec}, zi::Cint)::Cvoid
+end
+
+function blasfeo_cm_dsymv_u(m, alpha, sA, ai, aj, sx, xi, beta, sy, yi, sz, zi)
+    @ccall blasfeo.blasfeo_cm_dsymv_u(m::Cint, alpha::Cdouble, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_cm_dvec}, xi::Cint, beta::Cdouble, sy::Ptr{blasfeo_cm_dvec}, yi::Cint, sz::Ptr{blasfeo_cm_dvec}, zi::Cint)::Cvoid
+end
+
+function blasfeo_cm_dger(m, n, alpha, sx, xi, sy, yi, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dger(m::Cint, n::Cint, alpha::Cdouble, sx::Ptr{blasfeo_cm_dvec}, xi::Cint, sy::Ptr{blasfeo_cm_dvec}, yi::Cint, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+"""
+    blasfeo_cm_dpotrf_l(m, sC, ci, cj, sD, di, dj)
+
+LAPACK
+"""
+function blasfeo_cm_dpotrf_l(m, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dpotrf_l(m::Cint, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dpotrf_u(m, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_dpotrf_u(m::Cint, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_dgetrf_rp(m, n, sC, ci, cj, sD, di, dj, ipiv)
+    @ccall blasfeo.blasfeo_cm_dgetrf_rp(m::Cint, n::Cint, sC::Ptr{blasfeo_cm_dmat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_dmat}, di::Cint, dj::Cint, ipiv::Ptr{Cint})::Cvoid
+end
+
+"""
     blasfeo_saxpy(kmax, alpha, sx, xi, sy, yi, sz, zi)
 
 z = y + alpha*x
@@ -1180,10 +1433,19 @@ end
 """
     blasfeo_strmv_unn(m, sA, ai, aj, sx, xi, sz, zi)
 
-z <= beta * y + alpha * A * x ; A upper triangular
+z <= A * x ; A upper triangular
 """
 function blasfeo_strmv_unn(m, sA, ai, aj, sx, xi, sz, zi)
     @ccall blasfeo.blasfeo_strmv_unn(m::Cint, sA::Ptr{blasfeo_smat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_svec}, xi::Cint, sz::Ptr{blasfeo_svec}, zi::Cint)::Cvoid
+end
+
+"""
+    blasfeo_strmv_unu(m, sA, ai, aj, sx, xi, sz, zi)
+
+z <= A * x ; A upper triangular, assuming unit diagonal
+"""
+function blasfeo_strmv_unu(m, sA, ai, aj, sx, xi, sz, zi)
+    @ccall blasfeo.blasfeo_strmv_unu(m::Cint, sA::Ptr{blasfeo_smat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_svec}, xi::Cint, sz::Ptr{blasfeo_svec}, zi::Cint)::Cvoid
 end
 
 """
@@ -1193,6 +1455,15 @@ z <= A' * x ; A upper triangular
 """
 function blasfeo_strmv_utn(m, sA, ai, aj, sx, xi, sz, zi)
     @ccall blasfeo.blasfeo_strmv_utn(m::Cint, sA::Ptr{blasfeo_smat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_svec}, xi::Cint, sz::Ptr{blasfeo_svec}, zi::Cint)::Cvoid
+end
+
+"""
+    blasfeo_strmv_utu(m, sA, ai, aj, sx, xi, sz, zi)
+
+z <= A' * x ; A upper triangular, assuming unit diagonal
+"""
+function blasfeo_strmv_utu(m, sA, ai, aj, sx, xi, sz, zi)
+    @ccall blasfeo.blasfeo_strmv_utu(m::Cint, sA::Ptr{blasfeo_smat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_svec}, xi::Cint, sz::Ptr{blasfeo_svec}, zi::Cint)::Cvoid
 end
 
 """
@@ -1788,6 +2059,117 @@ A full, of size (m)x(n1)
 """
 function blasfeo_sgelqf_pd_lla(m, n1, sL0, l0i, l0j, sL1, l1i, l1j, sA, ai, aj, work)
     @ccall blasfeo.blasfeo_sgelqf_pd_lla(m::Cint, n1::Cint, sL0::Ptr{blasfeo_smat}, l0i::Cint, l0j::Cint, sL1::Ptr{blasfeo_smat}, l1i::Cint, l1j::Cint, sA::Ptr{blasfeo_smat}, ai::Cint, aj::Cint, work::Ptr{Cvoid})::Cvoid
+end
+
+"""
+    blasfeo_cm_sgemm_nn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+
+BLAS 3
+"""
+function blasfeo_cm_sgemm_nn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_sgemm_nn(m::Cint, n::Cint, k::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, beta::Cfloat, sC::Ptr{blasfeo_cm_smat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_sgemm_nt(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_sgemm_nt(m::Cint, n::Cint, k::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, beta::Cfloat, sC::Ptr{blasfeo_cm_smat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_sgemm_tn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_sgemm_tn(m::Cint, n::Cint, k::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, beta::Cfloat, sC::Ptr{blasfeo_cm_smat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_sgemm_tt(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_sgemm_tt(m::Cint, n::Cint, k::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, beta::Cfloat, sC::Ptr{blasfeo_cm_smat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_llnn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_llnn(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_llnu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_llnu(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_lltn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_lltn(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_lltu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_lltu(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_lunn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_lunn(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_lunu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_lunu(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_lutn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_lutn(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_lutu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_lutu(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_rlnn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_rlnn(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_rlnu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_rlnu(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_rltn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_rltn(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_rltu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_rltu(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_runn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_runn(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_runu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_runu(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_rutn(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_rutn(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_strsm_rutu(m, n, alpha, sA, ai, aj, sB, bi, bj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_strsm_rutu(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_smat}, bi::Cint, bj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+"""
+    blasfeo_cm_sgemv_n(m, n, alpha, sA, ai, aj, sx, xi, beta, sy, yi, sz, zi)
+
+BLAS 2
+"""
+function blasfeo_cm_sgemv_n(m, n, alpha, sA, ai, aj, sx, xi, beta, sy, yi, sz, zi)
+    @ccall blasfeo.blasfeo_cm_sgemv_n(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_cm_svec}, xi::Cint, beta::Cfloat, sy::Ptr{blasfeo_cm_svec}, yi::Cint, sz::Ptr{blasfeo_cm_svec}, zi::Cint)::Cvoid
+end
+
+function blasfeo_cm_sgemv_t(m, n, alpha, sA, ai, aj, sx, xi, beta, sy, yi, sz, zi)
+    @ccall blasfeo.blasfeo_cm_sgemv_t(m::Cint, n::Cint, alpha::Cfloat, sA::Ptr{blasfeo_cm_smat}, ai::Cint, aj::Cint, sx::Ptr{blasfeo_cm_svec}, xi::Cint, beta::Cfloat, sy::Ptr{blasfeo_cm_svec}, yi::Cint, sz::Ptr{blasfeo_cm_svec}, zi::Cint)::Cvoid
+end
+
+"""
+    blasfeo_cm_spotrf_l(m, sC, ci, cj, sD, di, dj)
+
+LAPACK
+"""
+function blasfeo_cm_spotrf_l(m, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_spotrf_l(m::Cint, sC::Ptr{blasfeo_cm_smat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
+end
+
+function blasfeo_cm_spotrf_u(m, sC, ci, cj, sD, di, dj)
+    @ccall blasfeo.blasfeo_cm_spotrf_u(m::Cint, sC::Ptr{blasfeo_cm_smat}, ci::Cint, cj::Cint, sD::Ptr{blasfeo_cm_smat}, di::Cint, dj::Cint)::Cvoid
 end
 
 function dtrcp_l_lib(m, alpha, offsetA, A, sda, offsetB, B, sdb)
@@ -2454,6 +2836,15 @@ create a strmat for a matrix of size m*n by using memory passed by a pointer (po
 """
 function blasfeo_cm_create_dmat(m, n, sA, memory)
     @ccall blasfeo.blasfeo_cm_create_dmat(m::Cint, n::Cint, sA::Ptr{blasfeo_pm_dmat}, memory::Ptr{Cvoid})::Cvoid
+end
+
+"""
+    blasfeo_cm_dgetr(m, n, sA, ai, aj, sB, bi, bj)
+
+aux
+"""
+function blasfeo_cm_dgetr(m, n, sA, ai, aj, sB, bi, bj)
+    @ccall blasfeo.blasfeo_cm_dgetr(m::Cint, n::Cint, sA::Ptr{blasfeo_cm_dmat}, ai::Cint, aj::Cint, sB::Ptr{blasfeo_cm_dmat}, bi::Cint, bj::Cint)::Cvoid
 end
 
 """

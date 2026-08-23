@@ -29,33 +29,39 @@
             @test_throws DimensionMismatch mul!(y_blasfeo, A_blasfeo,b_blasfeo)
             @test_throws DimensionMismatch mul!(b_blasfeo, A_blasfeo,a_blasfeo)
 
-            # Test nondestructively
-            @test A*a ≈ A_blasfeo*a_blasfeo
-            @test isa(A_blasfeo*a_blasfeo, VEC)
-            @test transpose(A)*a ≈ transpose(A_blasfeo)*a_blasfeo
-            @test isa(transpose(A_blasfeo)*a_blasfeo, VEC)
+            @testset "gemm" begin
+                # Test nondestructively
+                @test A*a ≈ A_blasfeo*a_blasfeo
+                @test isa(A_blasfeo*a_blasfeo, VEC)
+                @test transpose(A)*a ≈ transpose(A_blasfeo)*a_blasfeo
+                @test isa(transpose(A_blasfeo)*a_blasfeo, VEC)
 
-            # test mul!
-            @test mul!(y,A,a) ≈ mul!(y_blasfeo, A_blasfeo, a_blasfeo)
-            @test mul!(y,transpose(A),a) ≈ mul!(y_blasfeo, transpose(A_blasfeo), a_blasfeo)
+                # test mul!
+                @test mul!(y,A,a) ≈ mul!(y_blasfeo, A_blasfeo, a_blasfeo)
+                @test mul!(y,transpose(A),a) ≈ mul!(y_blasfeo, transpose(A_blasfeo), a_blasfeo)
 
-            # test asymmetric
-            @test C*c ≈ C_blasfeo*c_blasfeo
-            @test isa(C_blasfeo*c_blasfeo, VEC)
-            @test transpose(C)*y ≈ transpose(C_blasfeo)*y_blasfeo
-            @test isa(transpose(C_blasfeo)*y_blasfeo, VEC)
+                # test nonsquare
+                @test C*c ≈ C_blasfeo*c_blasfeo
+                @test isa(C_blasfeo*c_blasfeo, VEC)
+                @test transpose(C)*y ≈ transpose(C_blasfeo)*y_blasfeo
+                @test isa(transpose(C_blasfeo)*y_blasfeo, VEC)
 
-            # test symmetric
+            end
+
+            
             A_sym_L = Symmetric(A,:L)
             A_sym_L_blasfeo = Symmetric(A_blasfeo,:L)
             A_sym_U = Symmetric(A,:U)
             A_sym_U_blasfeo = Symmetric(A_blasfeo,:U)
+            @testset "symv" begin
+                # test symmetric
 
-            @test A_sym_L*a ≈ A_sym_L_blasfeo*a_blasfeo
-            @test isa(A_sym_L_blasfeo*a_blasfeo, VEC)
-            @test A_sym_U*a ≈ A_sym_U_blasfeo*a_blasfeo
-            @test isa(A_sym_U_blasfeo*a_blasfeo, VEC)
+                @test A_sym_L*a ≈ A_sym_L_blasfeo*a_blasfeo
+                @test isa(A_sym_L_blasfeo*a_blasfeo, VEC)
+                @test A_sym_U*a ≈ A_sym_U_blasfeo*a_blasfeo
+                @test isa(A_sym_U_blasfeo*a_blasfeo, VEC)
 
+            end
             # test triangular
             A_lnn = LowerTriangular(A)
             A_lnn_blasfeo = LowerTriangular(A_blasfeo)
@@ -66,47 +72,90 @@
             A_unu = UnitUpperTriangular(A)
             A_unu_blasfeo = UnitUpperTriangular(A_blasfeo)
 
-            # test lower triangular
-            @test A_lnn*a ≈ A_lnn_blasfeo*a_blasfeo
-            @test isa(A_lnn_blasfeo*a_blasfeo, VEC)
-            
-            if MAT == BlasfeoDmat # TODO(@anton) some things not implemented upstream yet
-                # test upper triangular transpose
-                @test transpose(A_unn)*a ≈ transpose(A_unn_blasfeo)*a_blasfeo
-                @test isa(transpose(A_unn_blasfeo)*a_blasfeo, VEC)
+            @testset "trmv" begin
+                # test lower triangular
+                @test A_lnn*a ≈ A_lnn_blasfeo*a_blasfeo
+                @test isa(A_lnn_blasfeo*a_blasfeo, VEC)
                 
-                # test lower triangular transpose
-                @test transpose(A_lnn)*a ≈ transpose(A_lnn_blasfeo)*a_blasfeo
-                @test isa(transpose(A_lnn_blasfeo)*a_blasfeo, VEC)
+                if MAT == BlasfeoDmat # TODO(@anton) some things not implemented upstream yet
+                    # test upper triangular transpose
+                    @test transpose(A_unn)*a ≈ transpose(A_unn_blasfeo)*a_blasfeo
+                    @test isa(transpose(A_unn_blasfeo)*a_blasfeo, VEC)
+                    
+                    # test lower triangular transpose
+                    @test transpose(A_lnn)*a ≈ transpose(A_lnn_blasfeo)*a_blasfeo
+                    @test isa(transpose(A_lnn_blasfeo)*a_blasfeo, VEC)
+                    
+                    # test upper triangular
+                    @test A_unn*a ≈ A_unn_blasfeo*a_blasfeo
+                    @test isa(A_unn_blasfeo*a_blasfeo, VEC)
+                    
+                    # test lower unit triangular
+                    @test A_lnu*a ≈ A_lnu_blasfeo*a_blasfeo
+                    @test isa(A_lnu_blasfeo*a_blasfeo, VEC)
+
+                    # test lower unit triangular transpose
+                    @test transpose(A_lnu)*a ≈ transpose(A_lnu_blasfeo)*a_blasfeo
+                    @test isa(transpose(A_lnu_blasfeo)*a_blasfeo, VEC)
+
+                    # test upper unit triangular
+                    # TODO(@anton) not implemented upstream
+                    #@test A_unu*a ≈ A_unu_blasfeo*a_blasfeo
+                    #@test isa(A_unu_blasfeo*a_blasfeo, VEC)
+
+                    # test upper unit triangular transpose
+                    # TODO(@anton) not implemented upstream
+                    #@test transpose(A_unu)*a ≈ transpose(A_unu_blasfeo)*a_blasfeo
+                    #@test isa(transpose(A_unu_blasfeo)*a_blasfeo, VEC)
+                end
+            end
+
+            @testset "trsv" begin
+                # test lower triangular
+                @test A_lnn\a ≈ A_lnn_blasfeo\a_blasfeo
+                @test isa(A_lnn_blasfeo\a_blasfeo, VEC)
+
                 
-                # test upper triangular
-                @test A_unn*a ≈ A_unn_blasfeo*a_blasfeo
-                @test isa(A_unn_blasfeo*a_blasfeo, VEC)
-                
-                # test lower unit triangular
-                @test A_lnu*a ≈ A_lnu_blasfeo*a_blasfeo
-                @test isa(A_lnu_blasfeo*a_blasfeo, VEC)
+                if MAT == BlasfeoDmat # TODO(@anton) some things not implemented upstream yet
+                    # test upper triangular
+                    @test A_unn\a ≈ A_unn_blasfeo\a_blasfeo
+                    @test isa(A_unn_blasfeo\a_blasfeo, VEC)
 
-                # test lower unit triangular transpose
-                @test transpose(A_lnu)*a ≈ transpose(A_lnu_blasfeo)*a_blasfeo
-                @test isa(transpose(A_lnu_blasfeo)*a_blasfeo, VEC)
+                    # test lower triangular transpose
+                    @test transpose(A_lnn)\a ≈ transpose(A_lnn_blasfeo)\a_blasfeo
+                    @test isa(transpose(A_lnn_blasfeo)\a_blasfeo, VEC)
+                    
+                    # test upper triangular transpose
+                    @test transpose(A_unn)\a ≈ transpose(A_unn_blasfeo)\a_blasfeo
+                    @test isa(transpose(A_unn_blasfeo)\a_blasfeo, VEC)
+                    
+                    # test lower unit triangular
+                    @test A_lnu\a ≈ A_lnu_blasfeo\a_blasfeo
+                    @test isa(A_lnu_blasfeo\a_blasfeo, VEC)
 
-                # test upper unit triangular
-                # TODO(@anton) not implemented upstream
-                #@test A_unu*a ≈ A_unu_blasfeo*a_blasfeo
-                #@test isa(A_unu_blasfeo*a_blasfeo, VEC)
+                    # test lower unit triangular transpose
+                    @test transpose(A_lnu)\a ≈ transpose(A_lnu_blasfeo)\a_blasfeo
+                    @test isa(transpose(A_lnu_blasfeo)\a_blasfeo, VEC)
 
-                # test upper unit triangular transpose
-                # TODO(@anton) not implemented upstream
-                #@test transpose(A_unu)*a ≈ transpose(A_unu_blasfeo)*a_blasfeo
-                #@test isa(transpose(A_unu_blasfeo)*a_blasfeo, VEC)
+                    # test upper unit triangular
+                    # TODO(@anton) not implemented upstream
+                    #@test A_unu\a ≈ A_unu_blasfeo\a_blasfeo
+                    #@test isa(A_unu_blasfeo\a_blasfeo, VEC)
+
+                    # test upper unit triangular transpose
+                    # TODO(@anton) not implemented upstream
+                    #@test transpose(A_unu)\a ≈ transpose(A_unu_blasfeo)\a_blasfeo
+                    #@test isa(transpose(A_unu_blasfeo)\a_blasfeo, VEC)
+                end
             end
 
             # test diagonal
             Y_diag = Diagonal(y)
             Y_diag_blasfeo = Diagonal(y_blasfeo)
-            @test Y_diag*a ≈ Y_diag_blasfeo*a_blasfeo
-            @test isa(Y_diag_blasfeo*a_blasfeo, VEC)
+            @testset "dimv" begin
+                @test Y_diag*a ≈ Y_diag_blasfeo*a_blasfeo
+                @test isa(Y_diag_blasfeo*a_blasfeo, VEC)
+            end
         end
     end
 end

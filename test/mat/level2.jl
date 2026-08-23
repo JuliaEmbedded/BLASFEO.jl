@@ -69,12 +69,12 @@
             # test lower triangular
             @test A_lnn*a ≈ A_lnn_blasfeo*a_blasfeo
             @test isa(A_lnn_blasfeo*a_blasfeo, VEC)
-
-            # test upper triangular transpose
-            @test transpose(A_unn)*a ≈ transpose(A_unn_blasfeo)*a_blasfeo
-            @test isa(transpose(A_unn_blasfeo)*a_blasfeo, VEC)
             
             if MAT == BlasfeoDmat # TODO(@anton) some things not implemented upstream yet
+                # test upper triangular transpose
+                @test transpose(A_unn)*a ≈ transpose(A_unn_blasfeo)*a_blasfeo
+                @test isa(transpose(A_unn_blasfeo)*a_blasfeo, VEC)
+                
                 # test lower triangular transpose
                 @test transpose(A_lnn)*a ≈ transpose(A_lnn_blasfeo)*a_blasfeo
                 @test isa(transpose(A_lnn_blasfeo)*a_blasfeo, VEC)

@@ -32,26 +32,25 @@ for (El, Mat, Vec, flag) in [
         return Y
     end
 
-    @eval function Base.:*(A::LowerTriangular{$El, Transpose{$El,$Mat}}, x::$Vec)
-        z = similar(x)
-        return mul!(z,A,x)
-    end
-
-    @eval function LinearAlgebra.mul!(Y::$Vec, A::LowerTriangular{$El, Transpose{$El,$Mat}}, B::$Vec)
-        @boundscheck begin
-            size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
-            size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
-        end
-        $blasfeo_trmv_utn(
-            size(A,1),
-            A.data.parent, 0, 0,
-            B, 0,
-            Y, 0,
-        )
-        return Y
-    end
-
     if El == :Cdouble # TODO(@anton) blasfeo_strmv_unn and blasfeo_strmv_lnu are unimplemented :(
+        @eval function Base.:*(A::LowerTriangular{$El, Transpose{$El,$Mat}}, x::$Vec)
+            z = similar(x)
+            return mul!(z,A,x)
+        end
+
+        @eval function LinearAlgebra.mul!(Y::$Vec, A::LowerTriangular{$El, Transpose{$El,$Mat}}, B::$Vec)
+            @boundscheck begin
+                size(A,2) == length(B) || throw(DimensionMismatch("Matrix second dimension doesn't match vector dimension"))
+                size(A,1) == length(Y) || throw(DimensionMismatch("Matrix first dimension doesn't match output vector dimension"))
+            end
+            $blasfeo_trmv_utn(
+                size(A,1),
+                A.data.parent, 0, 0,
+                B, 0,
+                Y, 0,
+            )
+            return Y
+        end
         @eval function Base.:*(A::UpperTriangular{$El, $Mat}, x::$Vec)
             z = similar(x)
             return mul!(z,A,x)

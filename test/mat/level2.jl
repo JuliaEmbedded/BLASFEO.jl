@@ -101,6 +101,12 @@
                 #@test transpose(A_unu)*a ≈ transpose(A_unu_blasfeo)*a_blasfeo
                 #@test isa(transpose(A_unu_blasfeo)*a_blasfeo, VEC)
             end
+
+            # test diagonal
+            Y_diag = Diagonal(y)
+            Y_diag_blasfeo = Diagonal(y_blasfeo)
+            @test Y_diag*a ≈ Y_diag_blasfeo*a_blasfeo
+            @test isa(Y_diag_blasfeo*a_blasfeo, VEC)
         end
     end
 end

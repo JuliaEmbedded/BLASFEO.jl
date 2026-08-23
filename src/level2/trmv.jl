@@ -12,7 +12,7 @@ for (El, Mat, Vec, flag) in [
     # blasfeo_trmv_unu = Symbol(:blasfeo_, flag, :trmv_unu)
     # blasfeo_trmv_utu = Symbol(:blasfeo_, flag, :trmv_utu)
 
-        @eval function Base.:*(A::LowerTriangular{$El, $Mat}, x::$Vec)
+    @eval function Base.:*(A::LowerTriangular{$El, $Mat}, x::$Vec)
         z = similar(x)
         return mul!(z,A,x)
     end

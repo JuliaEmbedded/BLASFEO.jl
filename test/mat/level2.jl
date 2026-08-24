@@ -156,6 +156,10 @@
                 @test Y_diag*a ≈ Y_diag_blasfeo*a_blasfeo
                 @test isa(Y_diag_blasfeo*a_blasfeo, VEC)
             end
+            @testset "disv" begin
+                @test Y_diag\a ≈ Y_diag_blasfeo\a_blasfeo
+                @test isa(Y_diag_blasfeo\a_blasfeo, VEC)
+            end
         end
     end
 end
